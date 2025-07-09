@@ -157,7 +157,7 @@ export default function NotesPage() {
                   <p className="text-gray-600 dark:text-gray-300 mb-4">
                     {selectedSubject === "all"
                       ? "Commencez par créer votre première note"
-                      : `Aucune note pour ${selectedSubject}`}
+                      : "aucune note"}
                   </p>
                   <Link href="/notes/new">
                     <Button>

@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
         "X-Title": "StudyMate",
       },
       body: JSON.stringify({
-        model: "meta-llama/llama-3.1-8b-instruct:free",
+        model: "mistralai/mistral-small-3.2-24b-instruct:free",
         messages: [
           {
             role: "user",
