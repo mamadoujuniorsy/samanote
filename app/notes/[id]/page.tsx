@@ -6,9 +6,11 @@ import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { BookOpen, ArrowLeft, Edit, Trash2, Calendar, Tag, Loader2 } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { BookOpen, ArrowLeft, Edit, Trash2, Calendar, Tag, Loader2, Volume2 } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
+import { AudioPlayer } from "@/components/audio-player"
 
 interface Note {
   id: string
@@ -30,6 +32,7 @@ export default function NotePage() {
   const [note, setNote] = useState<Note | null>(null)
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState(false)
+  const [showAudioPlayer, setShowAudioPlayer] = useState(false)
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -114,11 +117,15 @@ export default function NotePage() {
                   <BookOpen className="w-5 h-5 text-white" />
                 </div>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  StudyMate
+                  SamaNote
                 </h1>
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => setShowAudioPlayer(!showAudioPlayer)}>
+                <Volume2 className="w-4 h-4 mr-2" />
+                {showAudioPlayer ? "Masquer audio" : "Écouter"}
+              </Button>
               <Link href={`/notes/${note.id}/edit`}>
                 <Button variant="outline" size="sm">
                   <Edit className="w-4 h-4 mr-2" />
@@ -135,7 +142,11 @@ export default function NotePage() {
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto space-y-6">
+          {/* Lecteur Audio */}
+          {showAudioPlayer && <AudioPlayer text={note.content} title={note.title} noteId={note.id} />}
+
+          {/* Contenu de la note existant */}
           <Card>
             <CardHeader>
               <div className="flex items-start justify-between">
@@ -171,9 +182,22 @@ export default function NotePage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="prose prose-lg max-w-none dark:prose-invert">
-                <pre className="whitespace-pre-wrap font-sans leading-relaxed">{note.content}</pre>
-              </div>
+              <Tabs defaultValue="content" className="space-y-4">
+                <TabsList>
+                  <TabsTrigger value="content">Contenu</TabsTrigger>
+                  <TabsTrigger value="audio">Audio</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="content">
+                  <div className="prose prose-lg max-w-none dark:prose-invert">
+                    <pre className="whitespace-pre-wrap font-sans leading-relaxed">{note.content}</pre>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="audio">
+                  <AudioPlayer text={note.content} title={note.title} noteId={note.id} />
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </div>

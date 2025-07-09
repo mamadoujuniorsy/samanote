@@ -68,7 +68,8 @@ export default function NotesPage() {
     const matchesSearch =
       note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       note.content.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesSubject = selectedSubject === "all" || note.subject.name === selectedSubject
+    const matchesSubject = selectedSubject === "all" || note.subject.id === selectedSubject
+
     return matchesSearch && matchesSubject
   })
 
