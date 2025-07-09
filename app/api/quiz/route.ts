@@ -20,7 +20,13 @@ export async function GET(request: NextRequest) {
         ...(subjectId && { subjectId }),
       },
       include: {
-        subject: true,
+        subject: {
+          select: {
+            id: true,
+            name: true,
+            color: true,
+          },
+        },
         _count: {
           select: {
             quizAttempts: true,
@@ -32,7 +38,9 @@ export async function GET(request: NextRequest) {
       },
     })
 
+
     return NextResponse.json(quizzes)
+
   } catch (error) {
     console.error("Error fetching quizzes:", error)
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })

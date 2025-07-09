@@ -17,6 +17,7 @@ interface Quiz {
   timeLimit: number
   createdAt: string
   subject: {
+    id: string
     name: string
     color: string
   }
@@ -47,6 +48,7 @@ export default function QuizListPage() {
       const response = await fetch(url)
       const data = await response.json()
       setQuizzes(data)
+
     } catch (error) {
       console.error("Error fetching quizzes:", error)
     } finally {
