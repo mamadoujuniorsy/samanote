@@ -5,7 +5,7 @@ export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request })
   const { pathname } = request.nextUrl
 
-  // Routes protÈgÈes (l'application)
+  // Routes prot√©g√©es (l'application)
   const protectedRoutes = [
     "/dashboard", 
     "/profile", 
@@ -23,7 +23,7 @@ export async function middleware(request: NextRequest) {
   const authRoutes = ["/auth/signin", "/auth/signup", "/auth/login", "/auth/register"]
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route))
 
-  // Redirection si non authentifiÈ sur route protÈgÈe
+  // Redirection si non authentifi√© sur route prot√©g√©e
   if (isProtectedRoute && !token) {
     const url = request.nextUrl.clone()
     url.pathname = "/auth/signin"
@@ -31,7 +31,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Redirection si dÈj‡ authentifiÈ sur route d'auth
+  // Redirection si d√©j√† authentifi√© sur route d'auth
   if (isAuthRoute && token) {
     const url = request.nextUrl.clone()
     url.pathname = "/dashboard"
