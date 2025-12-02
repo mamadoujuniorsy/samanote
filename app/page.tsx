@@ -109,15 +109,15 @@ export default function LandingPage() {
         <div className="container mx-auto max-w-4xl">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-4xl font-bold text-[#007AFF] mb-2">10k+</div>
+              <div className="text-4xl font-bold text-[#007AFF] mb-2">80+</div>
               <div className="text-sm text-gray-600 font-medium">Étudiants actifs</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-[#007AFF] mb-2">50k+</div>
+              <div className="text-4xl font-bold text-[#007AFF] mb-2">500+</div>
               <div className="text-sm text-gray-600 font-medium">Notes créées</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-[#007AFF] mb-2">1M+</div>
+              <div className="text-4xl font-bold text-[#007AFF] mb-2">2000++</div>
               <div className="text-sm text-gray-600 font-medium">Questions générées</div>
             </div>
             <div>
