@@ -114,7 +114,7 @@ export default function AIGeneratePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-[#F8F9FA] dark:bg-gray-900">
       {/* Header */}
       <header className="border-b bg-white/80 backdrop-blur-sm dark:bg-gray-900/80">
         <div className="container mx-auto px-4 py-4">
@@ -126,10 +126,10 @@ export default function AIGeneratePage() {
               </Button>
             </Link>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-[#007AFF] rounded-lg flex items-center justify-center">
                 <BookOpen className="w-5 h-5 text-white" />
               </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold text-[#007AFF]">
                 SamaNote
               </h1>
             </div>
@@ -140,7 +140,7 @@ export default function AIGeneratePage() {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-            <Brain className="w-8 h-8 text-purple-600" />
+            <Brain className="w-8 h-8 text-[#00C4CC]" />
             Générateur IA 🤖
           </h2>
           <p className="text-gray-600 dark:text-gray-300">
@@ -154,7 +154,7 @@ export default function AIGeneratePage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-purple-600" />
+                  <Sparkles className="w-5 h-5 text-[#00C4CC]" />
                   Configuration
                 </CardTitle>
                 <CardDescription>Choisissez le type de contenu à générer et vos notes</CardDescription>
@@ -207,7 +207,7 @@ export default function AIGeneratePage() {
                 <Button
                   onClick={handleGenerate}
                   disabled={!inputNotes.trim() || isGenerating}
-                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  className="w-full bg-[#007AFF] hover:bg-blue-700"
                 >
                   {isGenerating ? (
                     <>

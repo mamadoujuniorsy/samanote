@@ -135,7 +135,7 @@ export default function SignInPage() {
               </div>
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                className="w-full bg-[#007AFF] hover:bg-blue-700"
                 disabled={isLoading}
               >
                 {isLoading ? (

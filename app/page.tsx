@@ -85,12 +85,12 @@ export default function Dashboard() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-4 animate-pulse">
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center mx-auto mb-4 animate-pulse">
             <BookOpen className="w-5 h-5 text-white" />
           </div>
-          <p>Chargement...</p>
+          <p className="text-gray-500">Chargement...</p>
         </div>
       </div>
     )
@@ -101,16 +101,16 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-[#F8F9FA] dark:bg-gray-900">
       {/* Header */}
       <header className="border-b bg-white/80 backdrop-blur-sm dark:bg-gray-900/80">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-[#007AFF] rounded-lg flex items-center justify-center">
                 <BookOpen className="w-5 h-5 text-white" />
               </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold text-[#007AFF]">
                 SamaNote
               </h1>
             </div>
@@ -123,7 +123,7 @@ export default function Dashboard() {
                 <LogOut className="w-4 h-4 mr-2" />
                 Déconnexion
               </Button>
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+              <div className="w-8 h-8 bg-[#007AFF] rounded-full flex items-center justify-center text-white text-sm font-medium">
                 {session.user?.name?.[0] || session.user?.email?.[0] || "U"}
               </div>
             </div>
@@ -168,14 +168,14 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-0">
+          <Card className="bg-[#00C4CC] text-white border-0">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-purple-100">Matières</p>
+                  <p className="text-cyan-100">Matières</p>
                   <p className="text-3xl font-bold">{subjects.length}</p>
                 </div>
-                <Brain className="w-8 h-8 text-purple-200" />
+                <Brain className="w-8 h-8 text-cyan-200" />
               </div>
             </CardContent>
           </Card>

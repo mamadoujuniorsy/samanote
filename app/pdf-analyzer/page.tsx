@@ -186,7 +186,7 @@ export default function PDFAnalyzerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-[#F8F9FA] dark:bg-gray-900">
       {/* Header */}
       <header className="border-b bg-white/80 backdrop-blur-sm dark:bg-gray-900/80">
         <div className="container mx-auto px-4 py-4">
@@ -198,10 +198,10 @@ export default function PDFAnalyzerPage() {
               </Button>
             </Link>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-[#007AFF] rounded-lg flex items-center justify-center">
                 <BookOpen className="w-5 h-5 text-white" />
               </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold text-[#007AFF]">
                 SamaNote
               </h1>
             </div>
@@ -331,7 +331,7 @@ export default function PDFAnalyzerPage() {
                         </SelectItem>
                         <SelectItem value="key_points">
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+                            <div className="w-6 h-6 bg-cyan-100 dark:bg-cyan-900 rounded-full flex items-center justify-center">
                               <span className="text-xs">💡</span>
                             </div>
                             <span>Points essentiels</span>
@@ -367,7 +367,7 @@ export default function PDFAnalyzerPage() {
                 <Button
                   onClick={handleAnalyze}
                   disabled={!file || isAnalyzing}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  className="w-full bg-[#007AFF] hover:bg-blue-700"
                 >
                   {isAnalyzing ? (
                     <>
@@ -388,7 +388,7 @@ export default function PDFAnalyzerPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-purple-600" />
+                  <Sparkles className="w-5 h-5 text-[#00C4CC]" />
                   Comment ça marche ?
                 </CardTitle>
               </CardHeader>

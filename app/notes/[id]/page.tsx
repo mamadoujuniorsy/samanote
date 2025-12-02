@@ -16,6 +16,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
+import { AIChat } from "@/components/ai-chat"
+
 interface Note {
   id: string
   title: string
@@ -35,13 +37,11 @@ export default function NotePage() {
   const router = useRouter()
   const [note, setNote] = useState<Note | null>(null)
   const [loading, setLoading] = useState(true)
-  const [aiSuggestions, setAiSuggestions] = useState<string[]>([])
+  const [isChatOpen, setIsChatOpen] = useState(false)
 
   useEffect(() => {
     if (status === "authenticated" && params.id) {
       fetchNote()
-      // Simulate AI suggestions
-      setAiSuggestions(["Résumé disponible", "3 concepts clés identifiés", "Lien vers 'Biologie Cellulaire'"])
     }
   }, [status, params.id])
 
@@ -89,15 +89,29 @@ export default function NotePage() {
   }
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full bg-white dark:bg-[#191919]">
       {/* Main Editor Area */}
-      <div className="flex-1 flex flex-col h-full max-w-4xl mx-auto bg-white">
+      <div className="flex-1 flex flex-col h-full max-w-3xl mx-auto bg-white dark:bg-[#191919]">
         {/* Minimalist Toolbar */}
-        <div className="flex items-center justify-between px-8 py-4 border-b border-transparent hover:border-gray-100 transition-colors">
-          <div className="text-sm text-muted-foreground">
-            Dernière modification {format(new Date(note.updatedAt), "d MMM yyyy à HH:mm", { locale: fr })}
+        <div className="flex items-center justify-between px-0 py-4 mt-8 mb-4 group">
+          <div className="flex items-center gap-2 text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
+            <span className="flex items-center gap-1">
+              <div className={`w-2 h-2 rounded-full ${note.subject.color}`}></div>
+              {note.subject.name}
+            </span>
+            <span>•</span>
+            <span>Modifié le {format(new Date(note.updatedAt), "d MMM", { locale: fr })}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-gray-400 hover:text-[#00C4CC] hover:bg-cyan-50"
+              onClick={() => setIsChatOpen(!isChatOpen)}
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              Demander à l'IA
+            </Button>
             <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
                 <Share2 className="w-4 h-4" />
             </Button>
@@ -118,47 +132,34 @@ export default function NotePage() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-12 py-8">
-          <input
-            type="text"
-            value={note.title}
-            readOnly // For now, read-only until edit logic is added
-            className="w-full text-4xl font-bold text-gray-900 placeholder-gray-300 border-none focus:ring-0 p-0 mb-6 bg-transparent"
-            placeholder="Titre de la note"
-          />
+        <div className="flex-1 overflow-y-auto px-0 pb-32">
+          <div className="group relative mb-8">
+            <h1 className="text-4xl font-bold text-[#37352F] dark:text-white placeholder-gray-300 border-none focus:ring-0 p-0 bg-transparent leading-tight">
+              {note.title}
+            </h1>
+          </div>
           
-          <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
-            {/* Simple textarea for editing or div for display. Using div for display as per request for "Readability" */}
+          <div className="prose prose-lg max-w-none text-[#37352F] dark:text-gray-300 leading-relaxed font-sans">
             <p className="whitespace-pre-wrap">{note.content}</p>
           </div>
 
           {note.tags.length > 0 && (
-            <div className="mt-8 flex gap-2">
+            <div className="mt-12 flex gap-2">
               {note.tags.map((tag) => (
-                <Badge key={tag} variant="outline" className="text-gray-500 border-gray-200">
+                <span key={tag} className="text-sm text-gray-400 bg-gray-50 px-2 py-1 rounded">
                   #{tag}
-                </Badge>
+                </span>
               ))}
             </div>
           )}
         </div>
       </div>
 
-      {/* Right Margin - AI Suggestions */}
-      <div className="w-64 border-l bg-gray-50/30 p-4 hidden xl:block">
-        <div className="sticky top-4 space-y-4">
-          <div className="flex items-center gap-2 text-ai-accent font-medium mb-4">
-            <Sparkles className="w-4 h-4" />
-            <span>Assistant IA</span>
-          </div>
-          
-          {aiSuggestions.map((suggestion, index) => (
-            <div key={index} className="p-3 rounded-lg bg-white border border-gray-100 shadow-sm text-sm text-gray-600 hover:border-ai-accent/50 cursor-pointer transition-colors">
-              {suggestion}
-            </div>
-          ))}
-        </div>
-      </div>
+      <AIChat 
+        noteContent={note.content} 
+        isOpen={isChatOpen} 
+        onClose={() => setIsChatOpen(false)} 
+      />
     </div>
   )
 }
