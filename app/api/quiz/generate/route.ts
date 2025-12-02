@@ -64,15 +64,41 @@ export async function POST(request: NextRequest) {
     // Parser le JSON généré
     let questions
     try {
-      const jsonMatch = content.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        questions = JSON.parse(jsonMatch[0]).questions
-      } else {
-        throw new Error("Format JSON invalide")
+      // Nettoyage du contenu (suppression des balises markdown)
+      const cleanContent = content.replace(/```json/g, "").replace(/```/g, "").trim()
+      
+      let parsed
+      try {
+        // Essai 1: Parsing direct du contenu nettoyé
+        parsed = JSON.parse(cleanContent)
+      } catch (e) {
+        // Essai 2: Extraction via Regex (trouver le premier objet JSON)
+        const jsonMatch = content.match(/\{[\s\S]*\}/)
+        if (jsonMatch) {
+          parsed = JSON.parse(jsonMatch[0])
+        } else {
+          throw new Error("Aucune structure JSON valide trouvée")
+        }
       }
+
+      // Récupération des questions (supporte { questions: [...] } ou directement [...])
+      questions = parsed.questions || parsed
+
+      if (!Array.isArray(questions)) {
+        // Essai 3: Si ce n'est pas un tableau, chercher un tableau dans les valeurs de l'objet
+        const values = Object.values(parsed)
+        const foundArray = values.find(v => Array.isArray(v))
+        if (foundArray) {
+          questions = foundArray
+        } else {
+          throw new Error("Format invalide: Impossible de trouver un tableau de questions")
+        }
+      }
+
     } catch (parseError) {
       console.error("Erreur parsing JSON:", parseError)
-      return NextResponse.json({ error: "Erreur lors du parsing du quiz généré" }, { status: 500 })
+      console.log("Contenu brut reçu de l'IA:", content)
+      return NextResponse.json({ error: "Erreur lors du parsing du quiz généré. Veuillez réessayer." }, { status: 500 })
     }
 
     // Sauvegarder le quiz en base
@@ -82,7 +108,7 @@ export async function POST(request: NextRequest) {
         description: description || `Quiz généré automatiquement à partir des notes de ${subjectName}`,
         questions: questions,
         timeLimit: 300, // 5 minutes
-        userId: session.user.id,
+        userId: (session.user as any).id,
         subjectId: subjectId,
       },
       include: {

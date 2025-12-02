@@ -78,7 +78,26 @@ export async function POST(request: NextRequest) {
       jsonMode: type === "quiz",
     })
 
-    return NextResponse.json({ content })
+    let finalContent = content
+
+    // Nettoyage spécifique pour le format JSON (quiz)
+    if (type === "quiz" && content) {
+      try {
+        // Enlever les balises markdown si présentes
+        const clean = content.replace(/```json/g, "").replace(/```/g, "").trim()
+        // Vérifier si c'est du JSON valide
+        JSON.parse(clean)
+        finalContent = clean
+      } catch (e) {
+        // Si invalide, essayer d'extraire le JSON
+        const match = content.match(/\{[\s\S]*\}/)
+        if (match) {
+          finalContent = match[0]
+        }
+      }
+    }
+
+    return NextResponse.json({ content: finalContent })
   } catch (error: any) {
     console.error("Erreur génération IA:", error)
     return NextResponse.json({ error: "Erreur lors de la génération" }, { status: 500 })
