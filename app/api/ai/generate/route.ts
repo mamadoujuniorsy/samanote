@@ -1,19 +1,20 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
+import { generateAIResponse } from "@/lib/ai-client"
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: "Non autoris√©" }, { status: 401 })
+      return NextResponse.json({ error: "Non autorisÈ" }, { status: 401 })
     }
 
     const body = await request.json().catch(() => null)
     
     if (!body) {
-      return NextResponse.json({ error: "Corps de requ√™te invalide" }, { status: 400 })
+      return NextResponse.json({ error: "Corps de requÍte invalide" }, { status: 400 })
     }
 
     const { notes, type, subject } = body
@@ -22,35 +23,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Notes et type requis" }, { status: 400 })
     }
 
-    if (!process.env.OPENROUTER_API_KEY) {
-      console.error("OPENROUTER_API_KEY manquant")
-      return NextResponse.json({ error: "Erreur de configuration serveur" }, { status: 500 })
-    }
-
     let prompt = ""
 
     switch (type) {
       case "summary":
-        prompt = `Cr√©ez un r√©sum√© structur√© et d√©taill√© des notes suivantes sur ${subject || "le sujet"}. 
-        Organisez le contenu avec des titres, sous-titres et points cl√©s. 
+        prompt = `CrÈez un rÈsumÈ structurÈ et dÈtaillÈ des notes suivantes sur ${subject || "le sujet"}. 
+        Organisez le contenu avec des titres, sous-titres et points clÈs. 
         Utilisez le format Markdown pour la structure.
         
         Notes: ${notes}`
         break
 
       case "flashcard":
-        prompt = `Cr√©ez des fiches de r√©vision (flashcards) bas√©es sur les notes suivantes sur ${subject || "le sujet"}.
+        prompt = `CrÈez des fiches de rÈvision (flashcards) basÈes sur les notes suivantes sur ${subject || "le sujet"}.
         Format: ## Fiche X: [Titre]
         **Question**: [Question claire]
-        **R√©ponse**: [R√©ponse d√©taill√©e]
+        **RÈponse**: [RÈponse dÈtaillÈe]
         
-        Cr√©ez au moins 5 fiches diff√©rentes couvrant les concepts principaux.
+        CrÈez au moins 5 fiches diffÈrentes couvrant les concepts principaux.
         
         Notes: ${notes}`
         break
 
       case "quiz":
-        prompt = `Cr√©ez un quiz de 10 questions √† choix multiples bas√© sur les notes suivantes sur ${subject || "le sujet"}.
+        prompt = `CrÈez un quiz de 10 questions ‡ choix multiples basÈ sur les notes suivantes sur ${subject || "le sujet"}.
         Retournez UNIQUEMENT un JSON valide avec cette structure exacte:
         {
           "questions": [
@@ -66,52 +62,25 @@ export async function POST(request: NextRequest) {
         break
 
       case "mindmap":
-        prompt = `Cr√©ez une carte mentale textuelle structur√©e bas√©e sur les notes suivantes sur ${subject || "le sujet"}.
-        Organisez les concepts principaux et leurs sous-concepts de mani√®re hi√©rarchique.
+        prompt = `CrÈez une carte mentale textuelle structurÈe basÈe sur les notes suivantes sur ${subject || "le sujet"}.
+        Organisez les concepts principaux et leurs sous-concepts de maniËre hiÈrarchique.
         Utilisez des tirets et indentations pour montrer la structure.
         
         Notes: ${notes}`
         break
 
       default:
-        return NextResponse.json({ error: "Type non support√©" }, { status: 400 })
+        return NextResponse.json({ error: "Type non supportÈ" }, { status: 400 })
     }
 
-    // Utilisation d'OpenRouter
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-        "X-Title": "StudyMate",
-      },
-      body: JSON.stringify({
-        model: "mistralai/mistral-small-3.2-24b-instruct:free",
-        messages: [
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-        max_tokens: 2000,
-        temperature: 0.7,
-      }),
+    const content = await generateAIResponse({
+      messages: [{ role: "user", content: prompt }],
+      jsonMode: type === "quiz",
     })
-
-    if (!response.ok) {
-      throw new Error("Erreur lors de l'appel √† OpenRouter")
-    }
-
-    const data = await response.json()
-    const content = data.choices[0]?.message?.content
-
-    if (!content) {
-      throw new Error("Aucun contenu g√©n√©r√©")
-    }
 
     return NextResponse.json({ content })
   } catch (error: any) {
-    console.error("Erreur g√©n√©ration IA:", error)
-    return NextResponse.json({ error: "Erreur lors de la g√©n√©ration du contenu" }, { status: 500 })
+    console.error("Erreur gÈnÈration IA:", error)
+    return NextResponse.json({ error: "Erreur lors de la gÈnÈration" }, { status: 500 })
   }
 }

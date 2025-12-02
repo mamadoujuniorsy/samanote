@@ -3,6 +3,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
+import { generateAIResponse } from "@/lib/ai-client"
 
 export async function POST(request: NextRequest) {
   try {
@@ -165,43 +166,20 @@ Réponds uniquement avec les points essentiels.`
       throw new Error("Clé API OpenRouter manquante")
     }
 
-    // Appel à OpenRouter avec gestion d'erreur améliorée
-    console.log("Appel à OpenRouter...")
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-        "X-Title": "SamaNote PDF Analyzer",
-      },
-      body: JSON.stringify({
-        model: "mistralai/mistral-small-3.2-24b-instruct:free",
-        messages: [
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-        max_tokens: 2500,
-        temperature: 0.3, // Réduit pour plus de cohérence
-        top_p: 0.9,
-      }),
+    // Appel à OpenRouter via le client centralisé
+    console.log("Appel à OpenRouter via ai-client...")
+    
+    const generatedContent = await generateAIResponse([
+      {
+        role: "user",
+        content: prompt,
+      }
+    ], {
+      max_tokens: 2500,
+      temperature: 0.3,
     })
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error("Erreur OpenRouter:", response.status, errorText)
-      throw new Error(`Erreur OpenRouter: ${response.status} - ${errorText}`)
-    }
-
-    const aiData = await response.json()
-    console.log("Réponse OpenRouter:", aiData)
-
-    const generatedContent = aiData.choices?.[0]?.message?.content
-
     if (!generatedContent) {
-      console.error("Pas de contenu généré:", aiData)
       throw new Error("Aucun contenu généré par l'IA")
     }
 

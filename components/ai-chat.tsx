@@ -29,22 +29,40 @@ export function AIChat({ noteContent, isOpen, onClose }: AIChatProps) {
     if (!input.trim()) return
 
     const userMessage = { role: "user" as const, content: input }
-    setMessages(prev => [...prev, userMessage])
+    const newMessages = [...messages, userMessage]
+    setMessages(newMessages)
     setInput("")
     setIsLoading(true)
 
     try {
-      // Simulate AI response for now
-      // In a real app, this would call /api/ai/chat with noteContent and history
-      setTimeout(() => {
-        setMessages(prev => [...prev, { 
-          role: "assistant", 
-          content: "Ceci est une réponse simulée. L'intégration API sera faite prochainement. Je comprends que vous parlez de : " + input 
-        }])
-        setIsLoading(false)
-      }, 1000)
+      const response = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messages: newMessages.filter(m => m.role !== "assistant" || m.content !== "Bonjour ! Je peux vous aider à comprendre cette note, la résumer ou créer un quiz. Que voulez-vous faire ?"), // Send history excluding initial greeting if needed, or send all
+          noteContent
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de la communication avec l'IA")
+      }
+
+      const data = await response.json()
+      
+      setMessages(prev => [...prev, { 
+        role: "assistant", 
+        content: data.content 
+      }])
     } catch (error) {
       console.error("Error sending message:", error)
+      setMessages(prev => [...prev, { 
+        role: "assistant", 
+        content: "Désolé, une erreur est survenue. Veuillez réessayer." 
+      }])
+    } finally {
       setIsLoading(false)
     }
   }
