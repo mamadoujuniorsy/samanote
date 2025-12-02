@@ -83,16 +83,17 @@ export async function POST(request: NextRequest) {
 
 async function enhanceTextForSpeech(text: string): Promise<string> {
   try {
-    const content = await generateAIResponse([
-      {
-        role: "user",
-        content: `Améliore ce texte pour qu'il soit plus agréable à écouter en synthèse vocale. 
+    const content = await generateAIResponse({
+      messages: [
+        {
+          role: "user",
+          content: `Améliore ce texte pour qu'il soit plus agréable à écouter en synthèse vocale. 
         Ajoute des pauses naturelles, reformule les phrases complexes, et rends le contenu plus fluide pour l'écoute.
         Garde le même contenu informatif mais optimise pour l'audio.
         
         Texte original: ${text.substring(0, 3000)}`,
-      },
-    ], {
+        },
+      ],
       max_tokens: 2000,
       temperature: 0.3,
     })
@@ -106,10 +107,11 @@ async function enhanceTextForSpeech(text: string): Promise<string> {
 
 async function generateSSML(text: string): Promise<string> {
   try {
-    const content = await generateAIResponse([
-      {
-        role: "user",
-        content: `Convertis ce texte en SSML (Speech Synthesis Markup Language) pour améliorer la synthèse vocale.
+    const content = await generateAIResponse({
+      messages: [
+        {
+          role: "user",
+          content: `Convertis ce texte en SSML (Speech Synthesis Markup Language) pour améliorer la synthèse vocale.
         Ajoute des balises pour les pauses, l'emphase, et la prononciation.
         
         Exemple de format SSML:
@@ -120,8 +122,8 @@ async function generateSSML(text: string): Promise<string> {
         </speak>
         
         Texte à convertir: ${text.substring(0, 3000)}`,
-      },
-    ], {
+        },
+      ],
       max_tokens: 2000,
       temperature: 0.3,
     })

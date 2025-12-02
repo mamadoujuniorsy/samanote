@@ -8,13 +8,13 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
+      return NextResponse.json({ error: "Non autorisÃ©" }, { status: 401 })
     }
 
     const body = await request.json().catch(() => null)
     
     if (!body) {
-      return NextResponse.json({ error: "Corps de requête invalide" }, { status: 400 })
+      return NextResponse.json({ error: "Corps de requÃªte invalide" }, { status: 400 })
     }
 
     const { notes, type, subject } = body
@@ -27,26 +27,26 @@ export async function POST(request: NextRequest) {
 
     switch (type) {
       case "summary":
-        prompt = `Créez un résumé structuré et détaillé des notes suivantes sur ${subject || "le sujet"}. 
-        Organisez le contenu avec des titres, sous-titres et points clés. 
+        prompt = `CrÃ©ez un rÃ©sumÃ© structurÃ© et dÃ©taillÃ© des notes suivantes sur ${subject || "le sujet"}. 
+        Organisez le contenu avec des titres, sous-titres et points clÃ©s. 
         Utilisez le format Markdown pour la structure.
         
         Notes: ${notes}`
         break
 
       case "flashcard":
-        prompt = `Créez des fiches de révision (flashcards) basées sur les notes suivantes sur ${subject || "le sujet"}.
+        prompt = `CrÃ©ez des fiches de rÃ©vision (flashcards) basÃ©es sur les notes suivantes sur ${subject || "le sujet"}.
         Format: ## Fiche X: [Titre]
         **Question**: [Question claire]
-        **Réponse**: [Réponse détaillée]
+        **RÃ©ponse**: [RÃ©ponse dÃ©taillÃ©e]
         
-        Créez au moins 5 fiches différentes couvrant les concepts principaux.
+        CrÃ©ez au moins 5 fiches diffÃ©rentes couvrant les concepts principaux.
         
         Notes: ${notes}`
         break
 
       case "quiz":
-        prompt = `Créez un quiz de 10 questions à choix multiples basé sur les notes suivantes sur ${subject || "le sujet"}.
+        prompt = `CrÃ©ez un quiz de 10 questions Ã  choix multiples basÃ© sur les notes suivantes sur ${subject || "le sujet"}.
         Retournez UNIQUEMENT un JSON valide avec cette structure exacte:
         {
           "questions": [
@@ -62,15 +62,15 @@ export async function POST(request: NextRequest) {
         break
 
       case "mindmap":
-        prompt = `Créez une carte mentale textuelle structurée basée sur les notes suivantes sur ${subject || "le sujet"}.
-        Organisez les concepts principaux et leurs sous-concepts de manière hiérarchique.
+        prompt = `CrÃ©ez une carte mentale textuelle structurÃ©e basÃ©e sur les notes suivantes sur ${subject || "le sujet"}.
+        Organisez les concepts principaux et leurs sous-concepts de maniÃ¨re hiÃ©rarchique.
         Utilisez des tirets et indentations pour montrer la structure.
         
         Notes: ${notes}`
         break
 
       default:
-        return NextResponse.json({ error: "Type non supporté" }, { status: 400 })
+        return NextResponse.json({ error: "Type non supportÃ©" }, { status: 400 })
     }
 
     const content = await generateAIResponse({
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ content })
   } catch (error: any) {
-    console.error("Erreur génération IA:", error)
-    return NextResponse.json({ error: "Erreur lors de la génération" }, { status: 500 })
+    console.error("Erreur gÃ©nÃ©ration IA:", error)
+    return NextResponse.json({ error: "Erreur lors de la gÃ©nÃ©ration" }, { status: 500 })
   }
 }

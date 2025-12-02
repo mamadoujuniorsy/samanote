@@ -169,12 +169,13 @@ Réponds uniquement avec les points essentiels.`
     // Appel à OpenRouter via le client centralisé
     console.log("Appel à OpenRouter via ai-client...")
     
-    const generatedContent = await generateAIResponse([
-      {
-        role: "user",
-        content: prompt,
-      }
-    ], {
+    const generatedContent = await generateAIResponse({
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        }
+      ],
       max_tokens: 2500,
       temperature: 0.3,
     })
