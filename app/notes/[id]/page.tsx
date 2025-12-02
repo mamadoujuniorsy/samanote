@@ -4,13 +4,17 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { BookOpen, ArrowLeft, Edit, Trash2, Calendar, Tag, Loader2, Volume2 } from "lucide-react"
-import Link from "next/link"
+import { Sparkles, Trash2, Save, Share2, MoreVertical } from "lucide-react"
 import { toast } from "sonner"
-import { AudioPlayer } from "@/components/audio-player"
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface Note {
   id: string
@@ -31,16 +35,15 @@ export default function NotePage() {
   const router = useRouter()
   const [note, setNote] = useState<Note | null>(null)
   const [loading, setLoading] = useState(true)
-  const [deleting, setDeleting] = useState(false)
-  const [showAudioPlayer, setShowAudioPlayer] = useState(false)
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([])
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth/signin")
-    } else if (status === "authenticated" && params.id) {
+    if (status === "authenticated" && params.id) {
       fetchNote()
+      // Simulate AI suggestions
+      setAiSuggestions(["Résumé disponible", "3 concepts clés identifiés", "Lien vers 'Biologie Cellulaire'"])
     }
-  }, [status, params.id, router])
+  }, [status, params.id])
 
   const fetchNote = async () => {
     try {
@@ -50,11 +53,9 @@ export default function NotePage() {
         setNote(data)
       } else {
         toast.error("Note non trouvée")
-        router.push("/notes")
       }
     } catch (error) {
       console.error("Error fetching note:", error)
-      toast.error("Erreur lors du chargement")
     } finally {
       setLoading(false)
     }
@@ -64,142 +65,98 @@ export default function NotePage() {
     if (!confirm("Êtes-vous sûr de vouloir supprimer cette note ?")) {
       return
     }
-
-    setDeleting(true)
     try {
       const response = await fetch(`/api/notes/${params.id}`, {
         method: "DELETE",
       })
-
       if (response.ok) {
-        toast.success("Note supprimée avec succès")
+        toast.success("Note supprimée")
         router.push("/notes")
-      } else {
-        toast.error("Erreur lors de la suppression")
+        // Force refresh of the list (in a real app, use a context or query invalidation)
+        window.location.href = "/notes" 
       }
     } catch (error) {
       toast.error("Erreur lors de la suppression")
-    } finally {
-      setDeleting(false)
     }
   }
 
-  if (status === "loading" || loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
-          <p>Chargement...</p>
-        </div>
-      </div>
-    )
+  if (loading) {
+    return <div className="p-8">Chargement...</div>
   }
 
-  if (!session || !note) {
-    return null
+  if (!note) {
+    return <div className="p-8">Note non trouvée</div>
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm dark:bg-gray-900/80">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link href="/notes">
-                <Button variant="outline" size="sm">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Retour aux notes
+    <div className="flex h-full">
+      {/* Main Editor Area */}
+      <div className="flex-1 flex flex-col h-full max-w-4xl mx-auto bg-white">
+        {/* Minimalist Toolbar */}
+        <div className="flex items-center justify-between px-8 py-4 border-b border-transparent hover:border-gray-100 transition-colors">
+          <div className="text-sm text-muted-foreground">
+            Dernière modification {format(new Date(note.updatedAt), "d MMM yyyy à HH:mm", { locale: fr })}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
+                <Share2 className="w-4 h-4" />
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <MoreVertical className="w-4 h-4" />
                 </Button>
-              </Link>
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                  <BookOpen className="w-5 h-5 text-white" />
-                </div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  SamaNote
-                </h1>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => setShowAudioPlayer(!showAudioPlayer)}>
-                <Volume2 className="w-4 h-4 mr-2" />
-                {showAudioPlayer ? "Masquer audio" : "Écouter"}
-              </Button>
-              <Link href={`/notes/${note.id}/edit`}>
-                <Button variant="outline" size="sm">
-                  <Edit className="w-4 h-4 mr-2" />
-                  Modifier
-                </Button>
-              </Link>
-              <Button variant="outline" size="sm" onClick={handleDelete} disabled={deleting}>
-                {deleting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" />}
-                Supprimer
-              </Button>
-            </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleDelete} className="text-red-600">
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Supprimer
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
-      </header>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto space-y-6">
-          {/* Lecteur Audio */}
-          {showAudioPlayer && <AudioPlayer text={note.content} title={note.title} noteId={note.id} />}
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto px-12 py-8">
+          <input
+            type="text"
+            value={note.title}
+            readOnly // For now, read-only until edit logic is added
+            className="w-full text-4xl font-bold text-gray-900 placeholder-gray-300 border-none focus:ring-0 p-0 mb-6 bg-transparent"
+            placeholder="Titre de la note"
+          />
+          
+          <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+            {/* Simple textarea for editing or div for display. Using div for display as per request for "Readability" */}
+            <p className="whitespace-pre-wrap">{note.content}</p>
+          </div>
 
-          {/* Contenu de la note existant */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-3 h-3 rounded-full ${note.subject.color}`}></div>
-                    <Badge variant="secondary">{note.subject.name}</Badge>
-                  </div>
-                  <CardTitle className="text-3xl">{note.title}</CardTitle>
-                  <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
-                      Créé le {new Date(note.createdAt).toLocaleDateString("fr-FR")}
-                    </div>
-                    {note.updatedAt !== note.createdAt && (
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        Modifié le {new Date(note.updatedAt).toLocaleDateString("fr-FR")}
-                      </div>
-                    )}
-                  </div>
-                  {note.tags && note.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {note.tags.map((tag) => (
-                        <Badge key={tag} variant="outline" className="text-xs">
-                          <Tag className="w-3 h-3 mr-1" />
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="content" className="space-y-4">
-                <TabsList>
-                  <TabsTrigger value="content">Contenu</TabsTrigger>
-                  <TabsTrigger value="audio">Audio</TabsTrigger>
-                </TabsList>
+          {note.tags.length > 0 && (
+            <div className="mt-8 flex gap-2">
+              {note.tags.map((tag) => (
+                <Badge key={tag} variant="outline" className="text-gray-500 border-gray-200">
+                  #{tag}
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
 
-                <TabsContent value="content">
-                  <div className="prose prose-lg max-w-none dark:prose-invert">
-                    <pre className="whitespace-pre-wrap font-sans leading-relaxed">{note.content}</pre>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="audio">
-                  <AudioPlayer text={note.content} title={note.title} noteId={note.id} />
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
+      {/* Right Margin - AI Suggestions */}
+      <div className="w-64 border-l bg-gray-50/30 p-4 hidden xl:block">
+        <div className="sticky top-4 space-y-4">
+          <div className="flex items-center gap-2 text-ai-accent font-medium mb-4">
+            <Sparkles className="w-4 h-4" />
+            <span>Assistant IA</span>
+          </div>
+          
+          {aiSuggestions.map((suggestion, index) => (
+            <div key={index} className="p-3 rounded-lg bg-white border border-gray-100 shadow-sm text-sm text-gray-600 hover:border-ai-accent/50 cursor-pointer transition-colors">
+              {suggestion}
+            </div>
+          ))}
         </div>
       </div>
     </div>

@@ -53,25 +53,25 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <BookOpen className="w-8 h-8 text-white" />
+          <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+            <BookOpen className="w-6 h-6 text-white" />
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold text-gray-900">
             SamaNote
           </h1>
-          <p className="text-gray-600 dark:text-gray-300 mt-2">Votre assistant d'étude intelligent</p>
+          <p className="text-gray-500 mt-2">Votre assistant d'étude intelligent</p>
         </div>
 
-        <Card>
+        <Card className="border-gray-200 shadow-sm">
           <CardHeader>
-            <CardTitle>Connexion</CardTitle>
+            <CardTitle className="text-xl">Connexion</CardTitle>
             <CardDescription>Connectez-vous à votre compte</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button onClick={handleGoogleSignIn} variant="outline" className="w-full">
+            <Button onClick={handleGoogleSignIn} variant="outline" className="w-full bg-white hover:bg-gray-50 text-gray-700 border-gray-200">
               <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
                 <path
                   fill="currentColor"
@@ -95,7 +95,7 @@ export default function SignInPage() {
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
+                <span className="w-full border-t border-gray-200" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-background px-2 text-muted-foreground">Ou</span>
