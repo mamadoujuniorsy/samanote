@@ -10,10 +10,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
     }
 
-    const { notes, type, subject } = await request.json()
+    const body = await request.json().catch(() => null)
+    
+    if (!body) {
+      return NextResponse.json({ error: "Corps de requête invalide" }, { status: 400 })
+    }
+
+    const { notes, type, subject } = body
 
     if (!notes || !type) {
       return NextResponse.json({ error: "Notes et type requis" }, { status: 400 })
+    }
+
+    if (!process.env.OPENROUTER_API_KEY) {
+      console.error("OPENROUTER_API_KEY manquant")
+      return NextResponse.json({ error: "Erreur de configuration serveur" }, { status: 500 })
     }
 
     let prompt = ""
