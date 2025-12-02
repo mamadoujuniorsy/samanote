@@ -32,7 +32,7 @@ export async function generateAIResponse(options: AIRequestOptions) {
         headers: {
           "Authorization": `Bearer ${apiKey}`,
           "Content-Type": "application/json",
-          "HTTP-Referer": "https://samanote.com",
+          "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "https://samanote.vercel.app",
           "X-Title": "SamaNote",
         },
         body: JSON.stringify({
@@ -47,7 +47,7 @@ export async function generateAIResponse(options: AIRequestOptions) {
       if (!response.ok) {
         const errorText = await response.text()
         console.warn(`Model ${model} failed with status ${response.status}: ${errorText}`)
-        throw new Error(`Status ${response.status}`)
+        throw new Error(`Status ${response.status} - ${errorText}`)
       }
 
       const data = await response.json()
@@ -57,9 +57,9 @@ export async function generateAIResponse(options: AIRequestOptions) {
       }
 
       return data.choices[0].message.content
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Error with model ${model}:`, error)
-      lastError = error
+      lastError = error.message || error
       // Continue to next model
     }
   }

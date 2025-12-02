@@ -38,67 +38,85 @@ export async function POST(request: NextRequest) {
     const subjectName = notes[0].subject.name
 
     // Générer le quiz avec OpenRouter
-    const prompt = `Créez un quiz de 10 questions à choix multiples basé sur les notes suivantes sur ${subjectName}.
-    Retournez UNIQUEMENT un JSON valide avec cette structure exacte:
-    {
-      "questions": [
-        {
-          "question": "Question ici",
-          "options": ["Option A", "Option B", "Option C", "Option D"],
-          "correct": 0
-        }
-      ]
-    }
+    // On demande un format JSON strict mais on gère le parsing manuellement pour plus de robustesse
+    const prompt = `Tu es un générateur de quiz expert. Crée un quiz de 10 questions à choix multiples basé sur les notes suivantes.
     
-    Notes: ${combinedNotes}`
+    Règles strictes:
+    1. Le format de sortie DOIT être un tableau JSON valide.
+    2. Chaque question doit avoir exactement 4 options.
+    3. L'index 'correct' doit être 0, 1, 2 ou 3.
+    4. Pas de texte avant ou après le JSON.
+    5. Pas de balises markdown (comme \`\`\`json).
 
+    Format attendu:
+    [
+      {
+        "question": "Quelle est la capitale de la France ?",
+        "options": ["Paris", "Londres", "Berlin", "Madrid"],
+        "correct": 0
+      }
+    ]
+    
+    Notes à utiliser:
+    ${combinedNotes}`
+
+    // On désactive le jsonMode pour éviter les erreurs de compatibilité avec certains modèles gratuits
+    // et on gère le parsing nous-mêmes
     const content = await generateAIResponse({
       messages: [{ role: "user", content: prompt }],
-      jsonMode: true,
+      jsonMode: false, 
     })
 
     if (!content) {
       throw new Error("Aucun contenu généré")
     }
 
-    // Parser le JSON généré
-    let questions
+    // Parser le JSON généré avec une logique robuste
+    let questions = []
     try {
-      // Nettoyage du contenu (suppression des balises markdown)
-      const cleanContent = content.replace(/```json/g, "").replace(/```/g, "").trim()
+      // 1. Nettoyage basique
+      let cleanContent = content.replace(/```json/g, "").replace(/```/g, "").trim()
       
-      let parsed
+      // 2. Essai de parsing direct
       try {
-        // Essai 1: Parsing direct du contenu nettoyé
-        parsed = JSON.parse(cleanContent)
+        const parsed = JSON.parse(cleanContent)
+        questions = Array.isArray(parsed) ? parsed : (parsed.questions || Object.values(parsed).find(v => Array.isArray(v)))
       } catch (e) {
-        // Essai 2: Extraction via Regex (trouver le premier objet JSON)
-        const jsonMatch = content.match(/\{[\s\S]*\}/)
-        if (jsonMatch) {
-          parsed = JSON.parse(jsonMatch[0])
+        // 3. Si échec, extraction via Regex du tableau JSON
+        const arrayMatch = cleanContent.match(/\[\s*\{[\s\S]*\}\s*\]/)
+        if (arrayMatch) {
+          questions = JSON.parse(arrayMatch[0])
         } else {
-          throw new Error("Aucune structure JSON valide trouvée")
+          // 4. Si toujours échec, extraction "sauvage" objet par objet
+          const objectRegex = /\{\s*"question"\s*:\s*"([^"]+)"\s*,\s*"options"\s*:\s*\[([^\]]+)\]\s*,\s*"correct"\s*:\s*(\d+)\s*\}/g
+          let match
+          while ((match = objectRegex.exec(cleanContent)) !== null) {
+            try {
+              const q = {
+                question: match[1],
+                options: match[2].split(',').map(o => o.trim().replace(/^"|"$/g, '')),
+                correct: parseInt(match[3])
+              }
+              questions.push(q)
+            } catch (err) {
+              console.error("Erreur extraction question unique:", err)
+            }
+          }
         }
       }
 
-      // Récupération des questions (supporte { questions: [...] } ou directement [...])
-      questions = parsed.questions || parsed
-
-      if (!Array.isArray(questions)) {
-        // Essai 3: Si ce n'est pas un tableau, chercher un tableau dans les valeurs de l'objet
-        const values = Object.values(parsed)
-        const foundArray = values.find(v => Array.isArray(v))
-        if (foundArray) {
-          questions = foundArray
-        } else {
-          throw new Error("Format invalide: Impossible de trouver un tableau de questions")
-        }
+      if (!questions || !Array.isArray(questions) || questions.length === 0) {
+        throw new Error("Impossible d'extraire des questions valides")
       }
 
-    } catch (parseError) {
+    } catch (parseError: any) {
       console.error("Erreur parsing JSON:", parseError)
       console.log("Contenu brut reçu de l'IA:", content)
-      return NextResponse.json({ error: "Erreur lors du parsing du quiz généré. Veuillez réessayer." }, { status: 500 })
+      return NextResponse.json({ 
+        error: "Erreur lors du parsing du quiz généré.", 
+        details: parseError.message || "Format JSON invalide",
+        rawContent: process.env.NODE_ENV === 'development' ? content : undefined
+      }, { status: 500 })
     }
 
     // Sauvegarder le quiz en base
@@ -119,6 +137,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(quiz)
   } catch (error: any) {
     console.error("Erreur génération quiz:", error)
-    return NextResponse.json({ error: "Erreur lors de la génération du quiz" }, { status: 500 })
+    return NextResponse.json({ 
+      error: "Erreur lors de la génération du quiz", 
+      details: error.message || "Erreur inconnue" 
+    }, { status: 500 })
   }
 }

@@ -100,6 +100,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ content: finalContent })
   } catch (error: any) {
     console.error("Erreur génération IA:", error)
-    return NextResponse.json({ error: "Erreur lors de la génération" }, { status: 500 })
+    return NextResponse.json({ 
+      error: "Erreur lors de la génération", 
+      details: error.message || "Erreur inconnue" 
+    }, { status: 500 })
   }
 }
